@@ -1,0 +1,40 @@
+name: Endor Labs - Node.js SCA Scan on PR
+on:
+  pull_request
+
+jobs:
+  scan-repo:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write # <-- Needed to comment on PRs
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22' # You can adjust this version as needed
+
+      - name: Install dependencies
+        run: npm install # This installs dependencies from package-lock.json
+
+      - name: Endor Labs SCA Scan
+        uses: endorlabs/github-action@main
+        with:
+          namespace: "motley-fool"
+          api: "https://api.endorlabs.com"
+          enable_github_action_token: true
+          scan_dependencies: true
+          pr: true
+          pr_baseline: main
+          enable_pr_comments: true
+          scan_summary_output_type: "table"
+          github_token: ${{ secrets.GITHUB_TOKEN }} # <-- Automatically generated
+          scan_secrets: true
+          scan_git_logs: true
+          scan_github_actions: true
+          scan_tools: true
+          tags: "actor = ${{ github.actor }},run-id = ${{ github.run_id }},event name = ${{ github.event_name }},workflow = ${{ github.workflow }},github sha = ${{ github.sha }}"
